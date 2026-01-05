@@ -194,6 +194,7 @@
   .category-health { @apply bg-[hsl(160,60%,40%)] text-white; }
   .category-world { @apply bg-[hsl(200,70%,45%)] text-white; }
   .category-breaking { @apply bg-destructive text-destructive-foreground; }
+  .category-india { @apply bg-[hsl(20,90%,55%)] text-white; }
 
   /* Ad Placeholder */
   .ad-placeholder {

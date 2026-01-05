@@ -20,7 +20,7 @@ const toArticle = (dbArticle: DBArticle): Article => ({
   title: dbArticle.title,
   excerpt: dbArticle.excerpt || '',
   content: dbArticle.content,
-  featuredImage: dbArticle.featured_image || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&h=630&fit=crop',
+  featuredImage: dbArticle.featured_image || '',
   category: (dbArticle.category?.slug || 'world') as Category,
   tags: dbArticle.tags || [],
   author: {
@@ -62,7 +62,8 @@ const CategoryPage = () => {
         if (category === 'breaking') {
           return a.isBreaking === true;
         }
-        return a.category === category;
+        // Filter by primary OR secondary category
+        return a.category === category || a.tags.includes(category); // Assuming secondary categories are stored as tags for simplicity
       })
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()) || [];
 

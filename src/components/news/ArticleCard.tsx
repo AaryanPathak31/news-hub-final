@@ -4,6 +4,7 @@ import { Article } from '@/types/news';
 import { CategoryBadge } from './CategoryBadge';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { AsyncImage } from '@/components/ui/AsyncImage';
 
 interface ArticleCardProps {
   article: Article;
@@ -23,21 +24,30 @@ export const ArticleCard = ({
   const articleUrl = `/${article.category}/${article.slug}`;
   const timeAgo = formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true });
 
+  // Use DB image or null (AsyncImage handles fallback)
+  const displayImage = article.featuredImage || '';
+
   if (variant === 'compact') {
     return (
       <article className={cn("group", className)}>
         <Link to={articleUrl} className="flex gap-3">
           {showImage && (
-            <div className="flex-shrink-0 w-20 h-20 overflow-hidden rounded-md">
-              <img
-                src={article.featuredImage}
+            <div className="flex-shrink-0 w-20 h-20 rounded-md overflow-hidden">
+              <AsyncImage
+                src={displayImage}
                 alt={article.title}
+                category={article.category}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
               />
             </div>
           )}
           <div className="flex-1 min-w-0">
+            <div className="flex gap-2 mb-1 flex-wrap">
+              <CategoryBadge category={article.category} size="sm" />
+              {article.secondaryCategory && (
+                <CategoryBadge category={article.secondaryCategory} size="sm" />
+              )}
+            </div>
             <h3 className="font-serif font-semibold text-sm leading-tight line-clamp-2 group-hover:text-destructive transition-colors">
               {article.title}
             </h3>
@@ -52,13 +62,13 @@ export const ArticleCard = ({
     return (
       <article className={cn("group border-b border-border pb-4", className)}>
         <Link to={articleUrl} className="flex gap-4">
-          {showImage && (
-            <div className="flex-shrink-0 w-32 md:w-48 aspect-video overflow-hidden rounded-md">
-              <img
-                src={article.featuredImage}
+          {showImage && displayImage && (
+            <div className="flex-shrink-0 w-32 md:w-48 aspect-video rounded-md overflow-hidden">
+              <AsyncImage
+                src={displayImage}
                 alt={article.title}
+                category={article.category}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
               />
             </div>
           )}
@@ -92,21 +102,26 @@ export const ArticleCard = ({
     return (
       <article className={cn("group relative", className)}>
         <Link to={articleUrl} className="block">
-          <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-lg">
-            <img
-              src={article.featuredImage}
+          <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-lg overflow-hidden">
+            <AsyncImage
+              src={displayImage}
               alt={article.title}
+              category={article.category}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              loading="eager"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
             <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
               {article.isBreaking && (
                 <span className="inline-block px-2 py-1 bg-destructive text-destructive-foreground text-xs font-bold uppercase tracking-wide rounded mb-2 animate-breaking">
                   Breaking
                 </span>
               )}
-              <CategoryBadge category={article.category} size="md" className="mb-3" />
+              <div className="flex gap-2 mb-3 flex-wrap">
+                <CategoryBadge category={article.category} size="md" />
+                {article.secondaryCategory && (
+                  <CategoryBadge category={article.secondaryCategory} size="md" />
+                )}
+              </div>
               <h2 className="font-serif font-bold text-xl md:text-3xl lg:text-4xl text-white leading-tight">
                 {article.title}
               </h2>
@@ -134,17 +149,22 @@ export const ArticleCard = ({
   return (
     <article className={cn("group", className)}>
       <Link to={articleUrl} className="block">
-        {showImage && (
-          <div className="aspect-video overflow-hidden rounded-md mb-3">
-            <img
-              src={article.featuredImage}
+        {showImage && displayImage && (
+          <div className="aspect-video rounded-md overflow-hidden mb-3">
+            <AsyncImage
+              src={displayImage}
               alt={article.title}
+              category={article.category}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
             />
           </div>
         )}
-        <CategoryBadge category={article.category} size="sm" />
+        <div className="flex gap-2 flex-wrap">
+          <CategoryBadge category={article.category} size="sm" />
+          {article.secondaryCategory && (
+            <CategoryBadge category={article.secondaryCategory} size="sm" />
+          )}
+        </div>
         <h3 className="font-serif font-bold text-lg mt-2 line-clamp-2 group-hover:text-destructive transition-colors">
           {article.title}
         </h3>

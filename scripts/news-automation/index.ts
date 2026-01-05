@@ -87,7 +87,7 @@ async function run() {
     } else {
         // Interactive Category Selection
         console.log('\n--- Manual News Generation ---');
-        console.log('Available Categories: All, India, World, Business, Technology, Sports, Entertainment');
+        console.log('Available Categories: All, India, World, Business, Technology, Sports, Entertainment, Health');
         try {
             // Timeout prompt after 5 seconds to default to ALL if run non-interactively
             const promptPromise = askQuestion('Enter category to generate (or leave empty for All): ');
@@ -148,7 +148,10 @@ async function run() {
         const slug = makeSlug(processed.title);
 
         // 3. Generate Image
-        const imageUrl = await generateAndUploadImage(processed.title, slug);
+        const imageUrl = await generateAndUploadImage(
+            processed.image_prompt, // This now comes from Gemini based on strict rules
+            slug
+        );
 
         // 4. Resolve Category
         const categoryId = await getOrCreateCategory(processed.category);
@@ -168,6 +171,7 @@ async function run() {
                 author_id: authorId,
                 tags: processed.tags,
                 is_breaking: true, // Auto-mark as breaking
+                secondary_category: processed.secondary_category, // New Field
                 is_featured: (processed.category === 'India')
             });
 

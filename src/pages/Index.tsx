@@ -25,7 +25,7 @@ const toArticle = (dbArticle: DBArticle): Article => ({
   title: dbArticle.title,
   excerpt: dbArticle.excerpt || '',
   content: dbArticle.content,
-  featuredImage: dbArticle.featured_image || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&h=630&fit=crop',
+  featuredImage: dbArticle.featured_image || '',
   category: (dbArticle.category?.slug || 'world') as Article['category'],
   tags: dbArticle.tags || [],
   author: {

@@ -35,6 +35,7 @@ const toArticle = (dbArticle: DBArticle): Article => ({
   content: dbArticle.content,
   featuredImage: dbArticle.featured_image || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&h=630&fit=crop',
   category: (dbArticle.category?.slug || 'world') as Category,
+  secondaryCategory: (dbArticle.secondary_category) as Category | undefined,
   tags: dbArticle.tags || [],
   author: {
     id: dbArticle.author_id || '1',
@@ -169,7 +170,12 @@ const ArticlePage = () => {
                     Breaking News
                   </span>
                 )}
-                <CategoryBadge category={article.category} size="md" className="mb-4" />
+                <div className="flex gap-2 mb-4 flex-wrap">
+                  <CategoryBadge category={article.category} size="md" />
+                  {article.secondaryCategory && (
+                    <CategoryBadge category={article.secondaryCategory} size="md" />
+                  )}
+                </div>
 
                 <h1 className="font-serif font-bold text-3xl md:text-4xl lg:text-5xl leading-tight mb-4" itemProp="headline">
                   {translatedTitle || article.title}

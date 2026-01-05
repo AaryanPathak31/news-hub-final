@@ -22,8 +22,8 @@ export async function fetchNews(): Promise<RawNewsItem[]> {
             console.log(`Fetching ${feed.source}...`);
             const parsed = await parser.parseURL(feed.url);
 
-            // Take top 2 items from each feed to avoid spamming
-            const topItems = parsed.items.slice(0, 2).map((item) => ({
+            // Take top 3 items from each feed to avoid spamming
+            const topItems = parsed.items.slice(0, 3).map((item) => ({
                 title: item.title || '',
                 link: item.link || '',
                 pubDate: item.pubDate || new Date().toISOString(),
@@ -35,7 +35,7 @@ export async function fetchNews(): Promise<RawNewsItem[]> {
 
             allNews.push(...topItems);
         } catch (error) {
-            console.error(`Error fetching ${feed.source}:`, error);
+            console.error(`❌ Error fetching ${feed.source} (${feed.url}):`, error);
         }
     }
 

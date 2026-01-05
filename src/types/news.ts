@@ -1,6 +1,7 @@
-export type Category = 
+export type Category =
   | 'breaking'
   | 'world'
+  | 'india'
   | 'politics'
   | 'technology'
   | 'business'
@@ -23,6 +24,7 @@ export interface Article {
   content: string;
   featuredImage: string;
   category: Category;
+  secondaryCategory?: Category;
   tags: string[];
   author: Author;
   publishedAt: string;
@@ -42,6 +44,7 @@ export interface CategoryInfo {
 
 export const CATEGORIES: CategoryInfo[] = [
   { slug: 'breaking', name: 'Breaking News', description: 'Latest breaking news and updates', color: 'category-breaking' },
+  { slug: 'india', name: 'India', description: 'National news and domestic affairs', color: 'category-india' },
   { slug: 'world', name: 'World', description: 'International news and global affairs', color: 'category-world' },
   { slug: 'politics', name: 'Politics', description: 'Political news and government updates', color: 'category-politics' },
   { slug: 'technology', name: 'Technology', description: 'Tech news, gadgets, and innovation', color: 'category-technology' },

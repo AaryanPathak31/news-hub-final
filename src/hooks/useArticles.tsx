@@ -22,6 +22,7 @@ export interface DBArticle {
   created_at: string;
   updated_at: string;
   category?: { id: string; name: string; slug: string } | null;
+  secondary_category?: string | null;
   author_profile?: { id: string; full_name: string | null; email: string | null } | null;
 }
 
@@ -101,6 +102,7 @@ const LIST_SELECT = `
   published_at,
   created_at,
   updated_at,
+  featured_image,
   category:categories(id, name, slug)
 `;
 
@@ -129,7 +131,7 @@ export const useArticles = (options?: { status?: 'draft' | 'published' | 'archiv
 
       return data?.map((article) => ({
         ...article,
-        featured_image: null, // Not fetched in list view
+        // featured_image: null, // Removed to allow frontend to see image URL
         author_profile: article.author_id ? profiles[article.author_id] || null : null,
       })) as DBArticle[];
     },
@@ -160,7 +162,7 @@ export const usePublishedArticles = () => {
       const { profiles } = await attachAuthorProfiles(data ?? []);
       const result = data?.map((article) => ({
         ...article,
-        featured_image: null, // Not fetched in list view
+        // featured_image: null, // Removed to allow frontend to see image URL
         author_profile: article.author_id ? profiles[article.author_id] || null : null,
       })) as DBArticle[];
 
@@ -187,7 +189,8 @@ export const useArticleBySlug = (slug: string) => {
           .select(
             `
           *,
-          category:categories(id, name, slug)
+          category:categories(id, name, slug),
+          secondary_category
         `
           )
           .eq('slug', slug)
@@ -215,10 +218,10 @@ export const useArticleBySlug = (slug: string) => {
       }
 
       const result = { ...data, author_profile } as DBArticle;
-      
+
       // Cache the article for offline access
       writeJSONToStorage(cacheKey, result);
-      
+
       return result;
     },
   });

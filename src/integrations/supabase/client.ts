@@ -5,6 +5,18 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.error("Missing Supabase Environment Variables!");
+  document.body.innerHTML = `
+    <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a1a;color:white;font-family:sans-serif;text-align:center;">
+      <h1 style="color:#ef4444;font-size:32px;margin-bottom:16px;">CRITICAL ERROR: Missing .env File</h1>
+      <p style="font-size:18px;max-width:600px;line-height:1.5;">The <code>.env</code> file (with API keys) is missing or deleted.</p>
+      <p style="color:#a1a1aa;margin-top:20px;">Please check the editor for a "Deleted" (red cross) .env file and restore it.</p>
+    </div>
+  `;
+  throw new Error("Missing Env Vars");
+}
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
