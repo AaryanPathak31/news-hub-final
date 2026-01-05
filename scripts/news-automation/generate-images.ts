@@ -54,8 +54,8 @@ export async function generateAndUploadImage(promptOrTitle: string, slug: string
 
     try {
         console.log(`\n🎨 Generating Unique Image:`);
-        console.log(`   Subject: ${title.substring(0, 30)}...`);
-        console.log(`   Prompt:  "${visualPrompt.substring(0, 60)}..."`);
+        console.log(`   Subject: ${promptOrTitle.substring(0, 30)}...`);
+        console.log(`   Prompt:  "${finalPrompt.substring(0, 60)}..."`);
         console.log(`   URL:     ${imageUrl}`);
 
         // PRE-WARM IMAGE: Fetch it once so Pollinations generates and caches it.

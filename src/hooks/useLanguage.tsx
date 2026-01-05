@@ -1,57 +1,54 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useEffect, ReactNode, useState } from "react";
 
-type Language = {
-  code: string;
-  name: string;
-  nativeName: string;
-};
-
-export const LANGUAGES: Language[] = [
-  { code: "en", name: "English", nativeName: "English" },
-  { code: "es", name: "Spanish", nativeName: "Español" },
-  { code: "fr", name: "French", nativeName: "Français" },
-  { code: "de", name: "German", nativeName: "Deutsch" },
-  { code: "it", name: "Italian", nativeName: "Italiano" },
-  { code: "pt", name: "Portuguese", nativeName: "Português" },
-  { code: "zh", name: "Chinese", nativeName: "中文" },
-  { code: "ja", name: "Japanese", nativeName: "日本語" },
-  { code: "ko", name: "Korean", nativeName: "한국어" },
-  { code: "ar", name: "Arabic", nativeName: "العربية" },
-  { code: "hi", name: "Hindi", nativeName: "हिन्दी" },
-  { code: "ru", name: "Russian", nativeName: "Русский" },
-];
+// Google Translate Global Definition
+declare global {
+  interface Window {
+    google: any;
+    googleTranslateElementInit: () => void;
+  }
+}
 
 type LanguageContextType = {
-  language: string;
-  setLanguage: (lang: string) => void;
-  languages: Language[];
-  currentLanguage: Language;
+  // We can expose status like "loaded"
+  isLoaded: boolean;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("language") || "en";
-    }
-    return "en";
-  });
-
-  const setLanguage = (lang: string) => {
-    setLanguageState(lang);
-    localStorage.setItem("language", lang);
-    document.documentElement.lang = lang;
-  };
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+    // Add Google Translate Script
+    const addScript = document.createElement("script");
+    addScript.setAttribute(
+      "src",
+      "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+    );
+    addScript.async = true;
+    document.body.appendChild(addScript);
 
-  const currentLanguage = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
+    // Initialize callback
+    window.googleTranslateElementInit = () => {
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: "en",
+          includedLanguages: "en,es,fr,de,it,pt,zh-CN,ja,ko,ar,hi,ru", // Match your list
+          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false,
+        },
+        "google_translate_element"
+      );
+      setIsLoaded(true);
+    };
+
+    return () => {
+      // Cleanup if necessary (rarely needed for google translate)
+    }
+  }, []);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, languages: LANGUAGES, currentLanguage }}>
+    <LanguageContext.Provider value={{ isLoaded }}>
       {children}
     </LanguageContext.Provider>
   );

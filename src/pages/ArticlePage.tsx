@@ -227,6 +227,10 @@ const ArticlePage = () => {
                   className="w-full aspect-video object-cover rounded-lg"
                   itemProp="image"
                   loading="eager"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&h=630&fit=crop';
+                  }}
                 />
               </figure>
 
