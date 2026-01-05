@@ -46,130 +46,62 @@ export const AINewsGenerator = () => {
     }
 
     const selectedCats = categories?.filter(c => selectedCategories.includes(c.id)) || [];
+    const categoryNames = selectedCats.map(c => c.name).join(',');
 
     setIsGenerating(true);
-    setGenerationLog([`🚀 Starting AI news generation for ${selectedCats.map(c => c.name).join(', ')}...`]);
-    setGenerationLog(prev => [...prev, `📰 Generating ${articleCount} article(s) per category as BREAKING NEWS`]);
+    setGenerationLog([`🚀 Triggering Cloud Generation via GitHub Actions...`]);
+    setGenerationLog(prev => [...prev, `📂 Categories: ${categoryNames}`]);
 
     try {
-      setGenerationLog(prev => [...prev, "📡 Fetching latest news from RSS feeds (with Indian news focus)..."]);
-
-      const { data, error } = await supabase.functions.invoke("auto-generate-news", {
-        body: {
-          categoryIds: selectedCategories,
-          categoryNames: selectedCats.map(c => c.name),
-          count: articleCount,
+      // Call Vercel API which calls GitHub API
+      const response = await fetch('/api/trigger-github', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          categories: categoryNames
+        }),
       });
 
-      if (error) {
-        throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to trigger generation');
       }
 
-      if (data.success) {
-        setGenerationLog(prev => [...prev, `✓ ${data.message}`]);
-        toast.success(data.message);
+      setGenerationLog(prev => [...prev, `✓ Success: GitHub Action triggered!`]);
+      setGenerationLog(prev => [...prev, `⏳ The articles will appear in ~2-5 minutes.`]);
+      toast.success("Generation started on the cloud!");
 
-        if (data.articles?.length > 0) {
-          setGenerationLog(prev => [
-            ...prev,
-            ...data.articles.map((a: { title: string }) => `✓ 🔴 BREAKING: ${a.title}`)
-          ]);
-        }
-      } else {
-        setGenerationLog(prev => [...prev, `✗ ${data.message || "Generation failed"}`]);
-        toast.error(data.message || "Failed to generate articles");
-      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error("Generation error:", error);
       setGenerationLog(prev => [...prev, `✗ Error: ${errorMessage}`]);
-      toast.error(errorMessage || "Failed to generate articles");
+      toast.error(errorMessage || "Failed to trigger generation");
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handleGenerateAll = async () => {
-    if (!categories || categories.length === 0) {
-      toast.error("No categories available");
-      return;
-    }
-
+    // Simplified All Handler
     setIsGenerating(true);
-    setGenerationLog([`🚀 Starting automated news generation for ALL categories...`]);
-    setGenerationLog(prev => [...prev, `📰 ${articleCount} articles per category as BREAKING NEWS`]);
-    setGenerationLog(prev => [...prev, `🇮🇳 Prioritizing Indian news sources`]);
-
-    let successCount = 0;
-    let failureCount = 0;
-    const failures: string[] = [];
-    let authFailed = false;
-
-    for (const category of categories) {
-      try {
-        setGenerationLog(prev => [...prev, `\n📁 Processing ${category.name}...`]);
-
-        const { data, error } = await supabase.functions.invoke("auto-generate-news", {
-          body: {
-            categoryIds: [category.id],
-            categoryNames: [category.name],
-            count: articleCount,
-          },
-        });
-
-        if (error) {
-          failureCount++;
-          failures.push(category.name);
-          setGenerationLog(prev => [...prev, `✗ ${category.name}: ${error.message}`]);
-
-          // Check for auth errors - stop early if unauthorized
-          if (error.message?.includes("401") || error.message?.includes("Unauthorized") || error.message?.includes("403")) {
-            authFailed = true;
-            setGenerationLog(prev => [...prev, `\n⚠️ Authentication failed. Please ensure you're logged in with an Editor or Admin account.`]);
-            break;
-          }
-        } else if (data?.success) {
-          successCount++;
-          setGenerationLog(prev => [...prev, `✓ ${category.name}: ${data.message}`]);
-          if (data.articles?.length > 0) {
-            data.articles.forEach((a: { title: string }) => {
-              setGenerationLog(prev => [...prev, `  🔴 ${a.title}`]);
-            });
-          }
-        } else {
-          failureCount++;
-          failures.push(category.name);
-          const msg = data?.error || data?.message || "Unknown error";
-          setGenerationLog(prev => [...prev, `✗ ${category.name}: ${msg}`]);
-        }
-
-        // Delay between categories to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 5000));
-      } catch (error: unknown) {
-        failureCount++;
-        failures.push(category.name);
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        setGenerationLog(prev => [...prev, `✗ ${category.name}: ${errorMessage}`]);
-      }
+    setGenerationLog([`🚀 Triggering Cloud Generation for ALL categories...`]);
+    try {
+      const response = await fetch('/api/trigger-github', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories: 'all' }),
+      });
+      if (!response.ok) throw new Error('Failed');
+      setGenerationLog(prev => [...prev, `✓ GitHub Action triggered for all categories.`]);
+      toast.success("Full generation started!");
+    } catch (e) {
+      toast.error("Failed to trigger");
+    } finally {
+      setIsGenerating(false);
     }
-
-    // Show accurate summary
-    if (authFailed) {
-      setGenerationLog(prev => [...prev, `\n⛔ Generation stopped due to authentication error.`]);
-      toast.error("Authentication failed. Please re-login or check your account role.");
-    } else if (failureCount === 0 && successCount > 0) {
-      setGenerationLog(prev => [...prev, `\n✓ Completed: ${successCount} categories succeeded. All articles published as BREAKING NEWS.`]);
-      toast.success(`Generated articles for ${successCount} categories!`);
-    } else if (successCount > 0) {
-      setGenerationLog(prev => [...prev, `\n⚠️ Completed: ${successCount} succeeded, ${failureCount} failed (${failures.join(", ")})`]);
-      toast.warning(`Partial success: ${successCount} categories succeeded, ${failureCount} failed`);
-    } else {
-      setGenerationLog(prev => [...prev, `\n✗ Failed: All ${failureCount} categories failed.`]);
-      toast.error("All categories failed to generate.");
-    }
-
-    setIsGenerating(false);
   };
 
   // Auto-generation timer

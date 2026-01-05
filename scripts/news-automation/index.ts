@@ -78,16 +78,26 @@ async function run() {
     // Check for CLI args first
     const args = process.argv.slice(2);
     const categoryArg = args.find(a => a.startsWith('--category='))?.split('=')[1];
+    const categoriesArg = args.find(a => a.startsWith('--categories='))?.split('=')[1];
     const isAll = args.includes('--all') || process.env.CI === 'true';
 
-    let targetCategory = '';
+    let targetCategories: string[] = [];
 
-    if (categoryArg) {
-        targetCategory = categoryArg.trim();
-        console.log(`\nCLI Selected Category: "${targetCategory}"`);
+    if (categoriesArg) {
+        // Handle "Business,Tech"
+        targetCategories = categoriesArg.split(',').map(c => c.trim()).filter(Boolean);
+        if (targetCategories.includes('all')) {
+             console.log('\nStarting generation for ALL categories...');
+             targetCategories = []; // Empty means all
+        } else {
+             console.log(`\nStarting generation for selected categories: ${targetCategories.join(', ')}`);
+        }
+    } else if (categoryArg) {
+        targetCategories = [categoryArg.trim()];
+        console.log(`\nStarting generation for category: "${targetCategories[0]}"`);
     } else if (isAll) {
-        console.log('\nRunning in Non-Interactive Mode (Generating ALL categories)...');
-        targetCategory = '';
+         console.log('\nRunning in Non-Interactive Mode (Generating ALL categories)...');
+         targetCategories = [];
     } else {
         // Interactive Category Selection
         console.log('\n--- Manual News Generation ---');
@@ -97,34 +107,27 @@ async function run() {
             const promptPromise = askQuestion('Enter category to generate (or leave empty for All): ');
             const timeoutPromise = new Promise<string>((resolve) => setTimeout(() => resolve(''), 5000));
             const selectedCategoryInput = await Promise.race([promptPromise, timeoutPromise]);
-            targetCategory = selectedCategoryInput.trim();
+            if (selectedCategoryInput.trim()) {
+                targetCategories = [selectedCategoryInput.trim()];
+            }
         } catch (e) {
             console.log('Skipping interactive prompt (non-interactive env).');
         }
     }
 
-    if (targetCategory) {
-        console.log(`\nSelected Category: "${targetCategory}"`);
-    } else {
-        console.log('\nGenerating for ALL categories...');
-    }
-
     // 1. Fetch Raw News
     let rawItems = await fetchNews();
 
-    // Filter by category if selected
-    if (targetCategory) {
+    // Filter by categories if selected
+    if (targetCategories.length > 0) {
         rawItems = rawItems.filter(item =>
-            item.category.toLowerCase() === targetCategory.toLowerCase()
+            targetCategories.some(cat => 
+                item.category.toLowerCase() === cat.toLowerCase()
+            )
         );
+        
         if (rawItems.length === 0) {
-            console.log(`No articles found for category "${targetCategory}" in the feeds.`);
-            // Try lenient matching
-            console.log('Trying loose match...');
-            rawItems = (await fetchNews()).filter(item =>
-                item.category.toLowerCase().includes(targetCategory.toLowerCase()) ||
-                item.title.toLowerCase().includes(targetCategory.toLowerCase())
-            );
+             console.log(`No articles found for selected categories in the feeds.`);
         }
     }
 

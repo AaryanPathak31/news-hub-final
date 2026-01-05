@@ -4,12 +4,17 @@ on:
   schedule:
     # Run every 20 minutes
     - cron: '*/20 * * * *'
-  workflow_dispatch: # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      categories:
+        description: 'Categories to generate (comma-separated, or "all")'
+        required: false
+        default: 'all'
 
 jobs:
   generate-news:
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # Safety limit
+    timeout-minutes: 15
 
     steps:
       - name: Checkout Code
@@ -24,8 +29,14 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Generate News (All Categories)
-        run: npx tsx scripts/news-automation/index.ts --all
+      - name: Generate News
+        # If manual input provided, use it; otherwise default to --all for cron
+        run: |
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            npx tsx scripts/news-automation/index.ts --all
+          else
+            npx tsx scripts/news-automation/index.ts --categories="${{ github.event.inputs.categories }}"
+          fi
         env:
           # Secrets must be added in GitHub Repository Settings -> Secrets and variables -> Actions
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
