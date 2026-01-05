@@ -28,6 +28,16 @@ export const RSS_FEEDS = [
     category: 'Health',
     url: 'https://www.hindustantimes.com/feeds/rss/lifestyle/health/rssfeed.xml',
     source: 'Hindustan Times Health'
+  },
+  {
+    category: 'Politics',
+    url: 'http://feeds.bbci.co.uk/news/politics/rss.xml',
+    source: 'BBC Politics'
+  },
+  {
+    category: 'Technology',
+    url: 'http://feeds.bbci.co.uk/news/technology/rss.xml',
+    source: 'BBC Technology'
   }
 ];
 
