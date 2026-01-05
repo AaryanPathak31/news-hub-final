@@ -19,6 +19,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import CookiePolicy from "./pages/CookiePolicy";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
+                  <Route path="/cookies" element={<CookiePolicy />} />
                   <Route path="/admin/new" element={<AdminNewArticle />} />
                   <Route path="/admin/edit/:id" element={<AdminEditArticle />} />
                   <Route path="/:category" element={<CategoryPage />} />

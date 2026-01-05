@@ -22,11 +22,11 @@ export const Header = () => {
       <div className="bg-primary text-primary-foreground">
         <div className="container flex items-center justify-between h-9 text-sm">
           <span className="hidden sm:block font-medium">
-            {new Date().toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             })}
           </span>
           <div className="flex items-center gap-2 ml-auto">
@@ -63,9 +63,9 @@ export const Header = () => {
 
           {/* Logo */}
           <Link to="/" className="flex items-center group">
-            <h1 className="text-2xl md:text-4xl font-serif font-bold tracking-tight text-foreground transition-transform group-hover:scale-[1.02]">
+            <span className="text-2xl md:text-4xl font-serif font-bold tracking-tight text-foreground transition-transform group-hover:scale-[1.02]">
               NoName<span className="text-destructive">News</span>
-            </h1>
+            </span>
           </Link>
 
           {/* Search */}

@@ -52,10 +52,7 @@ const Terms = () => {
                         These Terms shall be governed and construed in accordance with the laws of India, without regard to its conflict of law provisions.
                     </p>
 
-                    <h2 className="text-2xl font-semibold mt-8 mb-4">Contact Us</h2>
-                    <p>
-                        If you have any questions about these Terms, please contact us at: <a href="mailto:legal@nonamenews.com" className="text-primary hover:underline">legal@nonamenews.com</a>
-                    </p>
+                    
                 </div>
             </div>
         </Layout>

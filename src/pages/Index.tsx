@@ -137,16 +137,28 @@ const Index = () => {
       <>
         <SEOHead seo={seo} structuredData={structuredData} />
         <Layout>
-          <div className="container py-20 text-center">
-            <h2 className="font-serif text-2xl font-bold mb-4">Welcome to NoNameNews</h2>
-            <p className="text-muted-foreground mb-6">No articles published yet. Check back soon for the latest news!</p>
-            <p className="text-sm text-muted-foreground">
-              Editors can{' '}
-              <a href="/auth" className="text-primary hover:underline">
-                log in
-              </a>{' '}
-              to create articles.
-            </p>
+          <div className="container py-10 md:py-14 text-center">
+            <h1 className="font-serif text-3xl md:text-5xl font-bold mb-6 text-foreground">
+              NoNameNews – Breaking News, World News & Latest Updates
+            </h1>
+            <div className="max-w-4xl mx-auto space-y-4 text-muted-foreground text-lg leading-relaxed hidden md:block">
+              <p>NoNameNews is a digital news platform delivering the latest breaking news, live updates, and in-depth coverage from India and around the world. We focus on accuracy, speed, and relevance.</p>
+              <p>Our newsroom covers politics, government policies, technology trends, startups, business developments, sports updates, entertainment news, and public health stories. Our goal is to provide readers with clear, unbiased information that helps them stay informed.</p>
+              <p>From major national headlines to global developments, NoNameNews ensures that important stories reach readers quickly and responsibly. We update our platform regularly to reflect the latest verified information.</p>
+            </div>
+
+            {/* Empty State Message */}
+            <div className="mt-12 p-6 border rounded-lg bg-muted/30">
+              <h2 className="font-serif text-2xl font-bold mb-2">Welcome to NoNameNews</h2>
+              <p className="mb-4">No articles published yet. Check back soon for the latest news!</p>
+              <p className="text-sm text-muted-foreground">
+                Editors can{' '}
+                <a href="/auth" className="text-primary hover:underline">
+                  log in
+                </a>{' '}
+                to create articles.
+              </p>
+            </div>
           </div>
         </Layout>
       </>
@@ -157,6 +169,18 @@ const Index = () => {
     <>
       <SEOHead seo={seo} structuredData={structuredData} />
       <Layout>
+        {/* SEO Content (Visible) */}
+        <div className="container mt-8 text-center">
+          <h1 className="font-serif text-3xl md:text-5xl font-bold mb-6 text-foreground">
+            NoNameNews – Breaking News, World News & Latest Updates
+          </h1>
+          <div className="max-w-4xl mx-auto space-y-4 text-muted-foreground text-lg leading-relaxed hidden md:block">
+            <p>NoNameNews is a digital news platform delivering the latest breaking news, live updates, and in-depth coverage from India and around the world. We focus on accuracy, speed, and relevance.</p>
+            <p>Our newsroom covers politics, government policies, technology trends, startups, business developments, sports updates, entertainment news, and public health stories. Our goal is to provide readers with clear, unbiased information that helps them stay informed.</p>
+            <p>From major national headlines to global developments, NoNameNews ensures that important stories reach readers quickly and responsibly. We update our platform regularly to reflect the latest verified information.</p>
+          </div>
+        </div>
+
         {/* Offline banner */}
         {isError && (
           <div className="container mt-4">

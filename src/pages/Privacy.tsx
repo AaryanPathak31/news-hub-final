@@ -46,10 +46,6 @@ const Privacy = () => {
                         We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
                     </p>
 
-                    <h2 className="text-2xl font-semibold mt-8 mb-4">Contact Us</h2>
-                    <p>
-                        If you have any questions about this Privacy Policy, please contact us at: <a href="mailto:privacy@nonamenews.com" className="text-primary hover:underline">privacy@nonamenews.com</a>
-                    </p>
                 </div>
             </div>
         </Layout>
