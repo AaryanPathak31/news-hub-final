@@ -78,12 +78,16 @@ async function run() {
     // Check for CLI args first
     const args = process.argv.slice(2);
     const categoryArg = args.find(a => a.startsWith('--category='))?.split('=')[1];
+    const isAll = args.includes('--all') || process.env.CI === 'true';
 
     let targetCategory = '';
 
     if (categoryArg) {
         targetCategory = categoryArg.trim();
         console.log(`\nCLI Selected Category: "${targetCategory}"`);
+    } else if (isAll) {
+        console.log('\nRunning in Non-Interactive Mode (Generating ALL categories)...');
+        targetCategory = '';
     } else {
         // Interactive Category Selection
         console.log('\n--- Manual News Generation ---');

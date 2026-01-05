@@ -25,7 +25,7 @@ jobs:
         run: npm ci
 
       - name: Generate News (All Categories)
-        run: npx tsx scripts/news-automation/index.ts
+        run: npx tsx scripts/news-automation/index.ts --all
         env:
           # Secrets must be added in GitHub Repository Settings -> Secrets and variables -> Actions
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
