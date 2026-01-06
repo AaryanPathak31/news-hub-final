@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run sitemap && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-news": "npx tsx scripts/news-automation/index.ts"
+    "generate-news": "npx tsx scripts/news-automation/index.ts",
+    "sitemap": "npx tsx scripts/generate-sitemap.ts"
   },
   "dependencies": {
     "@fontsource/playfair-display": "^5.2.8",
@@ -46,6 +47,7 @@
     "@supabase/supabase-js": "^2.89.0",
     "@tanstack/react-query": "^5.83.0",
     "@types/dompurify": "^3.0.5",
+    "@types/string-similarity": "^4.0.2",
     "@types/uuid": "^10.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -69,6 +71,7 @@
     "recharts": "^2.15.4",
     "rss-parser": "^3.13.0",
     "sonner": "^1.7.4",
+    "string-similarity": "^4.0.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^13.0.0",

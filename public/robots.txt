@@ -1,5 +1,4 @@
 # NoNameNews Sitemap
-# https://nonamenews.com/sitemap.xml
 
 User-agent: Googlebot
 Allow: /
@@ -20,8 +19,7 @@ Allow: /
 Crawl-delay: 1
 
 # Sitemaps
-Sitemap: https://nonamenews.com/sitemap.xml
-Sitemap: https://nonamenews.com/news-sitemap.xml
+Sitemap: https://nonamenews.site/sitemap.xml
 
 # Disallow admin pages
 Disallow: /admin/

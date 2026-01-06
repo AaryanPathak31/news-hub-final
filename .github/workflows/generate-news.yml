@@ -44,3 +44,13 @@ jobs:
           GROQ_API_KEY_1: ${{ secrets.GROQ_API_KEY_1 }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
           GROQ_API_KEY_3: ${{ secrets.GROQ_API_KEY_3 }}
+
+      - name: Trigger Vercel Deploy
+        if: success()
+        run: |
+          if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK }}" ]; then
+            curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
+            echo "Triggered Vercel deployment."
+          else
+            echo "No VERCEL_DEPLOY_HOOK secret found. Skipping deployment."
+          fi

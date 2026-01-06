@@ -4,6 +4,7 @@ import { generateAndUploadImage } from './generate-images.js';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import * as readline from 'readline';
+import stringSimilarity from 'string-similarity';
 
 dotenv.config();
 
@@ -87,17 +88,17 @@ async function run() {
         // Handle "Business,Tech"
         targetCategories = categoriesArg.split(',').map(c => c.trim()).filter(Boolean);
         if (targetCategories.includes('all')) {
-             console.log('\nStarting generation for ALL categories...');
-             targetCategories = []; // Empty means all
+            console.log('\nStarting generation for ALL categories...');
+            targetCategories = []; // Empty means all
         } else {
-             console.log(`\nStarting generation for selected categories: ${targetCategories.join(', ')}`);
+            console.log(`\nStarting generation for selected categories: ${targetCategories.join(', ')}`);
         }
     } else if (categoryArg) {
         targetCategories = [categoryArg.trim()];
         console.log(`\nStarting generation for category: "${targetCategories[0]}"`);
     } else if (isAll) {
-         console.log('\nRunning in Non-Interactive Mode (Generating ALL categories)...');
-         targetCategories = [];
+        console.log('\nRunning in Non-Interactive Mode (Generating ALL categories)...');
+        targetCategories = [];
     } else {
         // Interactive Category Selection
         console.log('\n--- Manual News Generation ---');
@@ -121,13 +122,13 @@ async function run() {
     // Filter by categories if selected
     if (targetCategories.length > 0) {
         rawItems = rawItems.filter(item =>
-            targetCategories.some(cat => 
+            targetCategories.some(cat =>
                 item.category.toLowerCase() === cat.toLowerCase()
             )
         );
-        
+
         if (rawItems.length === 0) {
-             console.log(`No articles found for selected categories in the feeds.`);
+            console.log(`No articles found for selected categories in the feeds.`);
         }
     }
 
@@ -135,18 +136,37 @@ async function run() {
 
     const authorId = await getSystemAuthorId();
 
-    for (const item of rawItems) {
-        // Check if article with same title already exists (simple dedup)
-        const { data: existing } = await supabase
-            .from('articles')
-            .select('id')
-            .eq('title', item.title)
-            .maybeSingle();
+    // Fetch recent articles for deduplication logic
+    const { data: recentArticles } = await supabase
+        .from('articles')
+        .select('id, title')
+        .order('published_at', { ascending: false })
+        .limit(100);
 
-        if (existing) {
-            // console.log(`Skipping duplicate: ${item.title}`);
-            continue;
+    // Store as array of objects for fuzzy matching
+    const knownArticles = recentArticles?.map(a => ({ id: a.id, title: a.title })) || [];
+
+    console.log(`Loaded ${knownArticles.length} recent articles for deduplication check.`);
+
+    // Helper for fuzzy match - Returns the matching article or null
+    const findDuplicate = (newTitle: string) => {
+        // 1. Check exact match
+        const exact = knownArticles.find(a => a.title === newTitle);
+        if (exact) return exact;
+
+        // 2. Check fuzzy match
+        for (const existing of knownArticles) {
+            const similarity = stringSimilarity.compareTwoStrings(newTitle.toLowerCase(), existing.title.toLowerCase());
+            if (similarity > 0.6) { // 60% similarity threshold
+                console.log(`[Dedup] Match found: "${newTitle}" ~ "${existing.title}" (${(similarity * 100).toFixed(1)}%)`);
+                return existing;
+            }
         }
+        return null;
+    };
+
+    for (const item of rawItems) {
+        const existingArticle = findDuplicate(item.title);
 
         // 2. Process with AI
         const processed = await processNewsItem(item);
@@ -156,36 +176,63 @@ async function run() {
 
         // 3. Generate Image
         const imageUrl = await generateAndUploadImage(
-            processed.image_prompt, // This now comes from Gemini based on strict rules
+            processed.image_prompt,
             slug
         );
 
         // 4. Resolve Category
         const categoryId = await getOrCreateCategory(processed.category);
 
-        // 5. Save to Database
-        const { error } = await supabase
-            .from('articles')
-            .insert({
-                title: processed.title,
-                slug: slug,
-                content: processed.content,
-                excerpt: processed.excerpt,
-                category_id: categoryId,
-                featured_image: imageUrl,
-                status: 'published',
-                published_at: new Date().toISOString(),
-                author_id: authorId,
-                tags: processed.tags,
-                is_breaking: true, // Auto-mark as breaking
-                secondary_category: processed.secondary_category, // New Field
-                is_featured: (processed.category === 'India')
-            });
+        if (existingArticle) {
+            // --- UPDATE EXISTING ARTICLE ---
+            console.log(`[Update] Updating existing article ID: ${existingArticle.id}`);
 
-        if (error) {
-            console.error('Error saving article:', error);
+            const { error: updateError } = await supabase
+                .from('articles')
+                .update({
+                    title: processed.title, // Update title if AI improved it
+                    content: processed.content,
+                    excerpt: processed.excerpt,
+                    featured_image: imageUrl, // Update image
+                    updated_at: new Date().toISOString(), // Bump updated_at
+                    // We DO NOT change slug, created_at, or id to preserve SEO
+                    is_breaking: true // Re-flag as breaking if it's a major update
+                })
+                .eq('id', existingArticle.id);
+
+            if (updateError) {
+                console.error('Error updating article:', updateError);
+            } else {
+                console.log(`Successfully UPDATED: ${processed.title}`);
+            }
+
         } else {
-            console.log(`Successfully published (Breaking): ${processed.title}`);
+            // --- INSERT NEW ARTICLE ---
+            const { error } = await supabase
+                .from('articles')
+                .insert({
+                    title: processed.title,
+                    slug: slug,
+                    content: processed.content,
+                    excerpt: processed.excerpt,
+                    category_id: categoryId,
+                    featured_image: imageUrl,
+                    status: 'published',
+                    published_at: new Date().toISOString(),
+                    author_id: authorId,
+                    tags: processed.tags,
+                    is_breaking: true,
+                    secondary_category: processed.secondary_category,
+                    is_featured: (processed.category === 'India')
+                });
+
+            if (error) {
+                console.error('Error saving article:', error);
+            } else {
+                console.log(`Successfully PUBLISHED: ${processed.title}`);
+                // Add to local cache so we don't duplicate it immediately in this same run
+                knownArticles.push({ id: 'temp-new-id', title: processed.title });
+            }
         }
 
         // Anti-rate-limit delay for Free Tier/Experimental models

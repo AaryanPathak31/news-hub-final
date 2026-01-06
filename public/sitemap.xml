@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://nonamenews.site/sitemap-news.xml</loc>
+    <lastmod>2026-01-06T04:24:08.566Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nonamenews.site/sitemap-posts.xml</loc>
+    <lastmod>2026-01-06T04:24:08.566Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nonamenews.site/sitemap-categories.xml</loc>
+    <lastmod>2026-01-06T04:24:08.566Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://nonamenews.site/sitemap-static.xml</loc>
+    <lastmod>2026-01-06T04:24:08.566Z</lastmod>
+  </sitemap>
+</sitemapindex>
